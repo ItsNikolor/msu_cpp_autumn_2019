@@ -20,7 +20,7 @@ int to_int(const char* argv, int& i,error &e) {
 	int deg = 0;
 	while (argv[i] >= '0' && argv[i] <= '9') {
 		deg++;
-		if (deg == int_deg) {
+		if (deg == int_deg) {// Вся эта ветка нужна, чтобы проверить данное число на переполнение
 			if ((argv[i + 1] >= '0' && argv[i + 1] <= '9') || max_int / 10 < ans) {
 				e=Overflow;
 				return 0;
@@ -33,7 +33,6 @@ int to_int(const char* argv, int& i,error &e) {
 					}
 				}
 				else {
-
 					if ((argv[i] - '0') > min_int % 10) {
 						e=Overflow;
 						return 0;
@@ -110,10 +109,9 @@ int main(int argc, char** argv) {
 		return -1;
 	}
 	int tmp=max_int;
-	while(tmp!=0){
+	while(tmp!=0){// Скольки значное max_int(а также min_int) число
 		int_deg++;
 		tmp/=10;
 	}
 	return f(argv[1]);
-	//return f("2147483648");
 }
