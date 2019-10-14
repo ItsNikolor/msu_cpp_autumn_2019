@@ -4,6 +4,7 @@ def check(expr,result):
     if out.stdout.decode('ascii')!=result:
         print('error {0} != {1}, got {2}'.format(expr,result,out.stdout.decode('ascii')))
 check('2+2','4')
+check('5/2','2') # Тип инт, поэтому деление целочисленное
 check('w','Bad input')
 check('2+','Bad input')
 max_int='214748364'
