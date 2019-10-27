@@ -65,4 +65,5 @@ int main() {
 	catch (...) {
 		std::cout << "Some error\n";
 	}
+	Matrix m3(0, 5), m4(5, 0);
 }
