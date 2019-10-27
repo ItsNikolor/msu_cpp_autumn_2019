@@ -5,9 +5,9 @@ class Matrix {
 	int *alldata;
 	class SingleColumn {
 		friend class Matrix;
-		std::size_t rows;
+		std::size_t colums;
 		int *data;
-		SingleColumn(std::size_t rows, int* data);
+		SingleColumn(std::size_t colums, int* data);
 	public:
 		int& operator[](std::size_t pos);
 	};
