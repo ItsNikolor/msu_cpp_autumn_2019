@@ -13,7 +13,7 @@ int main() {
 	assert(m.getColumns() == 3);
 
 	try {
-		m[1][2] = 5; // строка 1, колонка 2
+		m[1][2] = 5; // Г±ГІГ°Г®ГЄГ  1, ГЄГ®Г«Г®Г­ГЄГ  2
 		std::cout << m[1][2] << '\n';
 	}
 	catch (std::out_of_range) {
@@ -48,7 +48,7 @@ int main() {
 	for (int i = 0; i < cols; i++) for (int j = 0; j < rows; j++) m[i][j] = 25;
 	Matrix m1(rows, cols);
 	for (int i = 0; i < cols; i++) for (int j = 0; j < rows; j++) m1[i][j] = 5;
-	m1 *= m[0][0];
+	m1 *= m[0][0];// *25
 	m *= 5;
 	assert(m1 == m);
 	m1[cols - 1][rows - 1] = 43;
