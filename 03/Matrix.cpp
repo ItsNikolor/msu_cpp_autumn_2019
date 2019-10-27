@@ -37,7 +37,7 @@ bool Matrix::operator!=(const Matrix& m) const {
 }
 
 Matrix::~Matrix() {
-	if (rows != 0 && colums != 0) delete[]alldata;
+        if (alldata) delete[]alldata;
 }
 
 Matrix::SingleColumn::SingleColumn(std::size_t colums, int* data) :colums(colums), data(data) {}
