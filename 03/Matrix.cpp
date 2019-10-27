@@ -17,8 +17,8 @@ std::size_t Matrix::getColumns(){
 }
 
 Matrix::SingleColumn Matrix::operator[](std::size_t pos){
-	if (pos < 0 || pos >= colums||rows==0) throw std::out_of_range("");
-	return Matrix::SingleColumn(rows, alldata + pos * rows);
+	if (pos < 0 || pos >= rows||colums==0) throw std::out_of_range("");
+	return Matrix::SingleColumn(colums, alldata + pos * colums);
 }
 
 Matrix& Matrix::operator*=(int a) {
@@ -40,9 +40,9 @@ Matrix::~Matrix(){
 	if(rows!=0&&colums!=0) delete[]alldata;
 }
 
-Matrix::SingleColumn::SingleColumn(std::size_t rows, int* data) :rows(rows), data(data) {}
+Matrix::SingleColumn::SingleColumn(std::size_t colums, int* data) :colums(colums), data(data) {}
 
 int& Matrix::SingleColumn::operator[](std::size_t pos){
-	if (pos < 0 || pos >= rows) throw std::out_of_range("");
+	if (pos < 0 || pos >= colums) throw std::out_of_range("");
 	return data[pos];
 }
