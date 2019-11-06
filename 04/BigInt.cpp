@@ -200,7 +200,7 @@ BigInt operator-(const BigInt& b, const BigInt& a){
 	if (&b == &a) return BigInt();
 
 	BigInt newa;// Я хочу выполнить b+(-a), но не хочу создавать копию a
-				// newa=-a, но без копирования
+				// newa=-a, поверхностное копирование
 	delete[]newa.memory;
 	newa.memory = a.memory;
 	newa.is_positive = !a.is_positive;
