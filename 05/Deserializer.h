@@ -47,8 +47,8 @@ private:
 			return Error::CorruptedArchive;
 		}
 
-		if (tmp[0] == 't') val = true;
-		else if (tmp[0] == 'f') val = false;
+		if (tmp == "true") val = true;
+		else if (tmp == "false") val = false;
 		else return Error::CorruptedArchive;
 
 		return Error::NoError;
@@ -57,19 +57,24 @@ private:
 	Error process_one(uint64_t& val) {
 		std::string tmp;
 		in_ >> tmp;
+		if (tmp[0] == '-') return Error::CorruptedArchive;
+		tmp = '0' + tmp;
 
 		if (in_.eof()) {
 			in_.clear();
 			return Error::CorruptedArchive;
 		}
 
-		if (tmp[0] == 't' || tmp[0] == 'f') return Error::CorruptedArchive;
+		if (tmp == "true" || tmp == "false") return Error::CorruptedArchive;
 		else {
-			std::stringstream s;
-			s << tmp;
-			s >> val;
+			size_t pos = 0;
+			int number = stoull(tmp, &pos);
+			if (pos != tmp.size()) return  Error::CorruptedArchive;
+			else val = number;
+
+			return Error::NoError;
 		}
-		return Error::NoError;
+		
 	}
 
 };

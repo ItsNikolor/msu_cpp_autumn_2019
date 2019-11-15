@@ -41,8 +41,8 @@ private:
 	}
 
 	Error process_one(bool& val) {
-		if (val) out_ << "t" << Separator;
-		else out_ << "f" << Separator;
+		if (val) out_ << "true" << Separator;
+		else out_ << "false" << Separator;
 		return Error::NoError;
 	}
 
@@ -50,5 +50,4 @@ private:
 		out_ << val << Separator;
 		return Error::NoError;
 	}
-
 };

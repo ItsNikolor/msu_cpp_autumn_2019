@@ -85,9 +85,10 @@ struct single_mystruct {
 	}
 };
 
-int main() {
-	Data x{ 1, true, 2 };
 
+
+int main(){
+	Data x{ 1, true, 2 };
 	std::stringstream stream;
 
 	Serializer serializer(stream);
