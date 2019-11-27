@@ -26,7 +26,7 @@ public:
 		if (count + size_ > capacity_) {
 			if (capacity_ * 2 > count + size_) capacity_ *= 2;
 			else capacity_ = count + size_;
-			auto newData = std::make_unique<T[]>(capacity_);
+			auto newData = std::make_unique<value_type[]>(capacity_);
 			std::copy(data_.get(), data_.get() + size_, newData.get());
 			data_.swap(newData);
 		}
