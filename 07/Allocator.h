@@ -60,7 +60,7 @@ public:
 
 	void reserve(size_type count) {
 		if (count <= capacity_) return;
-		auto newData = std::make_unique<T[]>(count);
+		auto newData = std::make_unique<value_type[]>(count);
 		std::copy(data_.get(), data_.get() + size_, newData.get());
 		data_.swap(newData);
 	}
