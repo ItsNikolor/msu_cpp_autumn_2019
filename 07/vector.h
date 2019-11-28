@@ -20,6 +20,7 @@ public:
 	Vector(size_type capacity, value_type value) :data_(alloc_.allocate(capacity)), size_(0), capacity_(capacity) {
 		for (; size_ < capacity_; size_++) alloc_.construct(data_.get() + size_, value);
 	}
+	~Vector() = default;
 
 
 
