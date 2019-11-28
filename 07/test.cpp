@@ -13,7 +13,7 @@ int main() {
 	for (auto i = a.rbegin(); i != a.rend(); ++i) cout << *i << ' ';
 	cout << "\n\n";
 	assert(a.size() == 13);
-
+	
 	for (int i = 0; i < a.size(); i++) cout << a[i] << ' ';
 	cout << "\n\n";
 	auto it = a.begin();
@@ -65,7 +65,8 @@ int main() {
 
 	const Vector<double> c(10, 42.0);
 	auto t = c.begin();
-	//*t = 3;
+	double tmp = *t;
+	//*t = tmp;
 	for (auto i : c) cout << i << ' ';
 	cout << "\n=====================================\n";
 	for (auto i = c.rbegin(); i != c.rend(); ++i) cout << *i << ' ';

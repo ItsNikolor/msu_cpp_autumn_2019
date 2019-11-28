@@ -1,6 +1,4 @@
-#include<memory>
-#include<algorithm>
-#include<stdexcept>
+#include<limits>
 
 #pragma once
 
@@ -9,63 +7,40 @@ class Allocator {
 public:
 	using value_type = T;
 	using pointer = T*;
-	using size_type = size_t;
+	using const_pointer = const T*;
+	using reference = T&;
 	using const_reference = const T&;
+	using size_type = std::size_t;
+	using difference_type = std::ptrdiff_t;
 
-	size_type size_ = 0, capacity_;
-	std::unique_ptr<value_type[]> data_;
+	Allocator()  = default;
+	~Allocator()  = default;
 
-	Allocator(size_type capacity = 0) : data_(new value_type[capacity]), capacity_(capacity) {}
-	Allocator(size_type capacity, value_type value) : data_(new value_type[capacity]), capacity_(capacity), size_(capacity) {
-		for (int i = 0; i < capacity; i++) {
-			data_[i] = value;
-		}
+	pointer address(reference x) const {
+		return &x;
+	}
+	const_pointer address(const_reference x) const {
+		return &x;
 	}
 
-	pointer allocate(size_type count) {
-		if (count + size_ > capacity_) {
-			if (capacity_ * 2 > count + size_) capacity_ *= 2;
-			else capacity_ = count + size_;
-			auto newData = std::make_unique<value_type[]>(capacity_);
-			std::copy(data_.get(), data_.get() + size_, newData.get());
-			data_.swap(newData);
-		}
-		size_ += count;
-		return data_.get() + size_ - count;
+	pointer allocate(size_type n) {
+		return new value_type[n];
 	}
 
-	void deallocate(size_type count) {
-		if (count > size_) throw std::runtime_error("No elements to delete");
-		for (int i = count - 1; i > size_ - count; i--) {
-			value_type trash;
-			trash = std::move(data_[i]);
-		}
-		size_ -= count;
+	void deallocate(pointer p, size_type n = 0) {
+		delete[]p;
 	}
 
-	void resize(size_type count, value_type value) {
-		if (count > capacity_) {
-			size_type dif = count - size_;
-			auto p = allocate(dif);
-			for (size_type i = 0; i < dif; i++) p[i] = value;
-		}
-		else if (count > size_) {
-			for (size_type i = size_; i < count; i++) data_[i] = value;
-			size_ = count;
-		}
-		else {
-			deallocate(size_ - count);
-		}
+	size_type max_size() const noexcept {
+		return std::numeric_limits<size_type>::max();
 	}
 
-	void reserve(size_type count) {
-		if (count <= capacity_) return;
-		auto newData = std::make_unique<value_type[]>(count);
-		std::copy(data_.get(), data_.get() + size_, newData.get());
-		data_.swap(newData);
+	void construct(pointer p, const_reference val) {
+		*p = val;
 	}
 
-	size_t max_size() const noexcept {
-		return capacity_;
+	void destroy(pointer p) {
+		value_type trash;
+		trash = std::move(*p);
 	}
 };
