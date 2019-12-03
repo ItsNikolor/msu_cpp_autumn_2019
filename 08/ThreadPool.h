@@ -34,7 +34,6 @@ class ThreadPool {
 		std::unique_lock<std::mutex> l(m);
 		dead++;
 		if (dead == _poolSize) c_exit.notify_one();
-		c.notify_all();
 		std::cout << "Tread " << std::this_thread::get_id() << " Died\n";
 	}
 public:
@@ -47,16 +46,14 @@ public:
 
 	~ThreadPool() {
 		std::unique_lock<std::mutex> l(m);
-		if (_poolSize == 0) return;
 		_work.push_back([]() {});
 		KeepWorking = false;
-		c.notify_one();
+		c.notify_all();
 		
 		c_exit.wait(l, [this]() {return dead == _poolSize; });
 		
 		std::cout << "Main tread "<<std::this_thread::get_id() << " died\n";
 		std::cout << "---------------------------------------------\n\n\n";
-		_poolSize = 0;
 	}
 
 	// pass arguments by value
