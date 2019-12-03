@@ -4,56 +4,41 @@
 #include<future>
 #include<vector>
 #include<deque>
-#include<iostream>
 #include <functional>
-
-
-template<class T>
-class myFuture {
-	friend class ThreadPool;
-	std::unique_ptr<std::promise<T>> promise;
-	std::future<T> future;
-	myFuture() :promise(new std::promise<T>), future(promise->get_future()) {}
-
-public:
-	T get() { return future.get(); }
-	myFuture(myFuture&& obj) noexcept {
-		promise = std::move(obj.promise);
-		future = std::move(obj.future);
-	}
-};
 
 class ThreadPool {
 	std::deque<std::function<void()>> _work;
-	std::mutex m, m_exit;
+	std::mutex m;
 	std::condition_variable c, c_exit;
 
 	size_t _poolSize;
-	int dead = 0;
-	std::atomic<bool>  KeepWorking = true;
+	
+	
+	volatile int dead = 0;
+	volatile bool KeepWorking = true;
 
 	void ThreadWork() {
-		while (KeepWorking) {
+		while (KeepWorking||_work.size()!=1) {
 			std::unique_lock<std::mutex> l(m);
 
-			//while (_work.empty() && KeepWorking)
-			c.wait(l, [this]() {return !(_work.empty() && KeepWorking); });
-			if (!KeepWorking) break;
+			c.wait(l, [this]() {return !(_work.empty()); });
+			if (!KeepWorking && _work.size() == 1) break;
 
 			auto work = std::move(_work.front());
 			_work.pop_front();
-			l.unlock();
 
+			l.unlock();
 			work();
+
 		}
 		std::unique_lock<std::mutex> l(m);
 		dead++;
 		if (dead == _poolSize) c_exit.notify_one();
-		std::cout << std::this_thread::get_id() << " Died\n";
+		c.notify_all();
+		std::cout << "Tread " << std::this_thread::get_id() << " Died\n";
 	}
 public:
 	explicit ThreadPool(size_t poolSize):_poolSize(poolSize) {
-		
 		for (size_t i = 0; i < poolSize; i++) {
 			std::thread t([this]() {ThreadWork(); });
 			t.detach();
@@ -61,25 +46,30 @@ public:
 	}
 
 	~ThreadPool() {
-		KeepWorking = false;
-		c.notify_all();
 		std::unique_lock<std::mutex> l(m);
-		//while (dead != _poolSize) 
+		if (_poolSize == 0) return;
+		_work.push_back([]() {});
+		KeepWorking = false;
+		c.notify_one();
+		
 		c_exit.wait(l, [this]() {return dead == _poolSize; });
-		//std::unique_lock<std::mutex> l(m);
-		std::cout << std::this_thread::get_id() << " Died\n";
+		
+		std::cout << "Main tread "<<std::this_thread::get_id() << " died\n";
+		std::cout << "---------------------------------------------\n\n\n";
+		_poolSize = 0;
 	}
 
 	// pass arguments by value
 	template <class Func, class... Args>
-	auto exec(Func func, Args... args)->myFuture<decltype(func(args...))> {
+	auto exec(Func func, Args... args)->std::future<decltype(func(args...))> {
 		using T = decltype(func(args...));
 		auto f = std::bind(func, std::forward<Args>(args)...);
-		myFuture<T> obj;
+		std::unique_ptr<std::promise<T>> p(new std::promise<T>);
 
-		std::function<void(std::promise<T>*)> ff = [f](std::promise<T>* p) {p->set_value(f()); };
 
-		std::function<void()> fff = std::bind(ff, obj.promise.get());
+		std::function<void(std::promise<T>*)> ff = [f](std::promise<T>* p) {p->set_value(f()); delete p; };
+
+		std::function<void()> fff = std::bind(ff, p.get());
 
 		{
 			std::unique_lock<std::mutex> l(m);
@@ -87,7 +77,6 @@ public:
 			_work.emplace_back(fff);
 		}
 		c.notify_one();
-		return obj;
+		return p.release()->get_future();
 	}
 };
-	
