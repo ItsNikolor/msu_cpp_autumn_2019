@@ -20,7 +20,10 @@ public:
 	Vector(size_type capacity, value_type value) :data_(alloc_.allocate(capacity)), size_(0), capacity_(capacity) {
 		for (; size_ < capacity_; size_++) alloc_.construct(data_.get() + size_, value);
 	}
-	~Vector() = default;
+	~Vector() {
+		for (; size_ > 0; size_--) alloc_.destroy(data_.get() + size_ - 1);
+		alloc_.dealloc(data_.release());
+	}
 
 
 
@@ -34,9 +37,11 @@ public:
 	void push_back(value_type&& value) {
 		if (size_ == capacity_) {
 			capacity_ = std::max(capacity_*2, size_type(1));
-			auto newData = std::make_unique<value_type[]>(capacity_);
+			auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
 			std::copy(data_.get(), data_.get() + size_, newData.get());
 			data_.swap(newData);
+			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
+			alloc_.dealloc(newData.release());
 		}
 		alloc_.construct(data_.get() + size_, value);
 		size_++;
@@ -47,6 +52,9 @@ public:
 			auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
 			std::copy(data_.get(), data_.get() + size_, newData.get());
 			data_.swap(newData);
+			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
+			alloc_.dealloc(newData.release());
+
 		}
 		alloc_.construct(data_.get() + size_, value);
 		size_++;
@@ -77,6 +85,8 @@ public:
 			std::copy(data_.get(), data_.get() + size_, newData.get());
 			data_.swap(newData);
 			for (; size_ < count; size_++) alloc_.construct(data_.get() + size_, value);
+			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
+			alloc_.dealloc(newData.release());
 		}
 		else if (count > size_) {
 			for (; size_ < count; size_++) alloc_.construct(data_.get() + size_, value);
@@ -92,6 +102,8 @@ public:
 		auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
 		std::copy(data_.get(), data_.get() + size_, newData.get());
 		data_.swap(newData);
+		for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
+		alloc_.dealloc(newData.release());
 	}
 
 	Iterator<T> begin() {

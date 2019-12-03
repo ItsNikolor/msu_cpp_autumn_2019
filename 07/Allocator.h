@@ -1,4 +1,5 @@
 #include<limits>
+#include<memory>
 
 #pragma once
 
@@ -24,11 +25,11 @@ public:
 	}
 
 	pointer allocate(size_type n) {
-		return new value_type[n];
+		return malloc(n * sizeof(value_type));
 	}
 
 	void deallocate(pointer p, size_type n = 0) {
-		delete[]p;
+		free(p);
 	}
 
 	size_type max_size() const noexcept {
@@ -36,11 +37,10 @@ public:
 	}
 
 	void construct(pointer p, const_reference val) {
-		*p = val;
+		new(p) T(val);
 	}
 
 	void destroy(pointer p) {
-		value_type trash;
-		trash = std::move(*p);
+		p->~T();
 	}
 };
