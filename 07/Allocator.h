@@ -26,7 +26,7 @@ public:
 
 	pointer allocate(size_type n) {
 		pointer p= (pointer)malloc(n * sizeof(value_type));
-		if (p == nullptr) throw std::bad_alloc("No memory");
+		if (p == nullptr) throw std::bad_alloc("No memory to allocate");
 		return p;
 	}
 
