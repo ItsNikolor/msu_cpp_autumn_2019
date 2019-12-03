@@ -25,7 +25,9 @@ public:
 	}
 
 	pointer allocate(size_type n) {
-		return malloc(n * sizeof(value_type));
+		pointer p= (pointer)malloc(n * sizeof(value_type));
+		if (p == nullptr) throw std::bad_alloc("No memory");
+		return p;
 	}
 
 	void deallocate(pointer p, size_type n = 0) {

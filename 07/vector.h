@@ -22,7 +22,7 @@ public:
 	}
 	~Vector() {
 		for (; size_ > 0; size_--) alloc_.destroy(data_ + size_ - 1);
-		alloc_.dealloc(data_);
+		alloc_.deallocate(data_);
 	}
 
 
@@ -38,12 +38,12 @@ public:
 		if (size_ == capacity_) {
 			capacity_ = std::max(capacity_*2, size_type(1));
 			auto newData = alloc_.allocate(capacity_);
-			for (size_type s; s < size_; s++) {
+			for (size_type s=0; s < size_; s++) {
 				alloc_.construct(newData + s, data_[s]);
 				alloc_.destroy(data_ + s);
 			}
 			swap(data_, newData);
-			alloc_.dealloc(newData);
+			alloc_.deallocate(newData);
 		}
 		alloc_.construct(data_ + size_, value);
 		size_++;
@@ -52,12 +52,12 @@ public:
 		if (size_ == capacity_) {
 			capacity_ = std::max(capacity_*2, size_type(1));
 			auto newData = alloc_.allocate(capacity_);
-			for (size_type s; s < size_; s++) {
+			for (size_type s=0; s < size_; s++) {
 				alloc_.construct(newData + s, data_[s]);
 				alloc_.destroy(data_ + s);
 			}
-			swap(data_, newData);
-			alloc_.dealloc(newData);
+			std::swap(data_, newData);
+			alloc_.deallocate(newData);
 
 		}
 		alloc_.construct(data_ + size_, value);
@@ -86,12 +86,12 @@ public:
 		if (count > capacity_) {
 			capacity_ = std::max(capacity_*2, count);
 			auto newData = alloc_.allocate(capacity_);
-			for (size_type s; s < size_; s++) {
+			for (size_type s=0; s < size_; s++) {
 				alloc_.construct(newData + s, data_[s]);
 				alloc_.destroy(data_ + s);
 			}
-			swap(data_, newData);
-			alloc_.dealloc(newData);
+			std::swap(data_, newData);
+			alloc_.deallocate(newData);
 			for (; size_ < count; size_++) alloc_.construct(data_ + size_, value);
 		}
 		else if (count > size_) {
@@ -106,44 +106,44 @@ public:
 		if (count <= capacity_) return;
 		capacity_ = count;
 		auto newData = alloc_.allocate(capacity_);
-		for (size_type s; s < size_; s++) {
+		for (size_type s=0; s < size_; s++) {
 			alloc_.construct(newData + s, data_[s]);
 			alloc_.destroy(data_ + s);
 		}
 		swap(data_, newData);
-		alloc_.dealloc(newData);
+		alloc_.deallocate(newData);
 	}
 
 	Iterator<T> begin() {
-		return Iterator<T>(data_.get());
+		return Iterator<T>(data_);
 	}
 	Iterator<T> end() {
-		return Iterator<T>(data_.get()+size_);
+		return Iterator<T>(data_+size_);
 	}
 
 	rIterator<T> rbegin() {
-		return rIterator<T>(data_.get() + size_ - 1);
+		return rIterator<T>(data_ + size_ - 1);
 	}
 	rIterator<T> rend() {
-		return rIterator<T>(data_.get() - 1);
+		return rIterator<T>(data_ - 1);
 	}
 
 	const Iterator<const T> begin() const {
-		return Iterator<const T>(data_.get());
+		return Iterator<const T>(data_);
 	}
 	const Iterator<const T> end() const {
-		return Iterator<const T>(data_.get() + size_);
+		return Iterator<const T>(data_ + size_);
 	}
 
 	const rIterator<const T> rbegin() const {
-		return rIterator<const T>(data_.get() + size_ - 1);
+		return rIterator<const T>(data_ + size_ - 1);
 	}
 	const rIterator<const T> rend() const {
-		return rIterator<const T>(data_.get() - 1);
+		return rIterator<const T>(data_ - 1);
 	}
 
 private:
 	Alloc alloc_;
-	pointer* data_;
+	pointer data_;
 	size_type size_, capacity_;
 };
