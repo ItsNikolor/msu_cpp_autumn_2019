@@ -18,11 +18,11 @@ public:
 
 	Vector(size_type capacity = 0) :data_(alloc_.allocate(capacity)),size_(0),capacity_(capacity) {}
 	Vector(size_type capacity, value_type value) :data_(alloc_.allocate(capacity)), size_(0), capacity_(capacity) {
-		for (; size_ < capacity_; size_++) alloc_.construct(data_.get() + size_, value);
+		for (; size_ < capacity_; size_++) alloc_.construct(data_ + size_, value);
 	}
 	~Vector() {
-		for (; size_ > 0; size_--) alloc_.destroy(data_.get() + size_ - 1);
-		alloc_.dealloc(data_.release());
+		for (; size_ > 0; size_--) alloc_.destroy(data_ + size_ - 1);
+		alloc_.dealloc(data_);
 	}
 
 
@@ -37,33 +37,37 @@ public:
 	void push_back(value_type&& value) {
 		if (size_ == capacity_) {
 			capacity_ = std::max(capacity_*2, size_type(1));
-			auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
-			std::copy(data_.get(), data_.get() + size_, newData.get());
-			data_.swap(newData);
-			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
-			alloc_.dealloc(newData.release());
+			auto newData = alloc_.allocate(capacity_);
+			for (size_type s; s < size_; s++) {
+				alloc_.construct(newData + s, data_[s]);
+				alloc_.destroy(data_ + s);
+			}
+			swap(data_, newData);
+			alloc_.dealloc(newData);
 		}
-		alloc_.construct(data_.get() + size_, value);
+		alloc_.construct(data_ + size_, value);
 		size_++;
 	}
 	void push_back(const value_type& value) {
 		if (size_ == capacity_) {
 			capacity_ = std::max(capacity_*2, size_type(1));
-			auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
-			std::copy(data_.get(), data_.get() + size_, newData.get());
-			data_.swap(newData);
-			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
-			alloc_.dealloc(newData.release());
+			auto newData = alloc_.allocate(capacity_);
+			for (size_type s; s < size_; s++) {
+				alloc_.construct(newData + s, data_[s]);
+				alloc_.destroy(data_ + s);
+			}
+			swap(data_, newData);
+			alloc_.dealloc(newData);
 
 		}
-		alloc_.construct(data_.get() + size_, value);
+		alloc_.construct(data_ + size_, value);
 		size_++;
 	}
 
 	void pop_back() {
 		if (size_ == 0) throw std::runtime_error("No elements to remove");
 		size_--;
-		alloc_.destroy(data_.get() + size_);
+		alloc_.destroy(data_ + size_);
 	}
 
 	bool empty() const {
@@ -75,35 +79,39 @@ public:
 	}
 
 	void clear() {
-		while (size_ != 0) alloc_.destroy(data_.get() + --size_);
+		while (size_ != 0) alloc_.destroy(data_ + --size_);
 	}
 
 	void resize(size_type count, value_type value=value_type()) {
 		if (count > capacity_) {
 			capacity_ = std::max(capacity_*2, count);
-			auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
-			std::copy(data_.get(), data_.get() + size_, newData.get());
-			data_.swap(newData);
-			for (; size_ < count; size_++) alloc_.construct(data_.get() + size_, value);
-			for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
-			alloc_.dealloc(newData.release());
+			auto newData = alloc_.allocate(capacity_);
+			for (size_type s; s < size_; s++) {
+				alloc_.construct(newData + s, data_[s]);
+				alloc_.destroy(data_ + s);
+			}
+			swap(data_, newData);
+			alloc_.dealloc(newData);
+			for (; size_ < count; size_++) alloc_.construct(data_ + size_, value);
 		}
 		else if (count > size_) {
-			for (; size_ < count; size_++) alloc_.construct(data_.get() + size_, value);
+			for (; size_ < count; size_++) alloc_.construct(data_ + size_, value);
 		}
 		else {
-			for (; size_ > count; size_--) alloc_.destroy(data_.get() + size_ - 1);
+			for (; size_ > count; size_--) alloc_.destroy(data_ + size_ - 1);
 		}
 	}
 
 	void reserve(size_type count) {
 		if (count <= capacity_) return;
 		capacity_ = count;
-		auto newData = std::unique_ptr<value_type[]>(alloc_.allocate(capacity_));
-		std::copy(data_.get(), data_.get() + size_, newData.get());
-		data_.swap(newData);
-		for (size_type s; s < size_; s++) alloc_.destroy(newData.get() + s);
-		alloc_.dealloc(newData.release());
+		auto newData = alloc_.allocate(capacity_);
+		for (size_type s; s < size_; s++) {
+			alloc_.construct(newData + s, data_[s]);
+			alloc_.destroy(data_ + s);
+		}
+		swap(data_, newData);
+		alloc_.dealloc(newData);
 	}
 
 	Iterator<T> begin() {
@@ -136,6 +144,6 @@ public:
 
 private:
 	Alloc alloc_;
-	std::unique_ptr<value_type[]> data_;
+	pointer* data_;
 	size_type size_, capacity_;
 };
