@@ -9,12 +9,11 @@
 class ThreadPool {
 	std::deque<std::function<void()>> _work;
 	std::mutex m;
-	std::condition_variable c, c_exit;
+	std::condition_variable c;
+	std::vector<std::thread> threads;
 
 	size_t _poolSize;
 	
-	
-	volatile int dead = 0;
 	volatile bool KeepWorking = true;
 
 	void ThreadWork() {
@@ -31,47 +30,41 @@ class ThreadPool {
 			work();
 
 		}
-		std::unique_lock<std::mutex> l(m);
-		dead++;
-		if (dead == _poolSize) c_exit.notify_one();
-		std::cout << "Tread " << std::this_thread::get_id() << " Died\n";
 	}
 public:
 	explicit ThreadPool(size_t poolSize):_poolSize(poolSize) {
 		for (size_t i = 0; i < poolSize; i++) {
-			std::thread t([this]() {ThreadWork(); });
-			t.detach();
+			threads.emplace_back([this]() {ThreadWork(); });
 		}
 	}
 
 	~ThreadPool() {
 		std::unique_lock<std::mutex> l(m);
+
 		_work.push_back([]() {});
 		KeepWorking = false;
+
 		c.notify_all();
+		l.unlock();
 		
-		c_exit.wait(l, [this]() {return dead == _poolSize; });
-		
-		std::cout << "Main tread "<<std::this_thread::get_id() << " died\n";
-		std::cout << "---------------------------------------------\n\n\n";
+		for (auto& t : threads) t.join();
 	}
 
 	// pass arguments by value
 	template <class Func, class... Args>
 	auto exec(Func func, Args... args)->std::future<decltype(func(args...))> {
 		using T = decltype(func(args...));
-		auto f = std::bind(func, std::forward<Args>(args)...);
+		//auto f = std::bind(func, std::forward<Args>(args)...);
+		auto f = [func,args...]() {return func(args...); };
 		std::unique_ptr<std::promise<T>> p(new std::promise<T>);
 
-
-		std::function<void(std::promise<T>*)> ff = [f](std::promise<T>* p) {p->set_value(f()); delete p; };
-
-		std::function<void()> fff = std::bind(ff, p.get());
+		auto pointer = p.get();
+		std::function<void()> ff = [f,pointer]() {pointer->set_value(f()); delete pointer; };
 
 		{
 			std::unique_lock<std::mutex> l(m);
 
-			_work.emplace_back(fff);
+			_work.emplace_back(ff);
 		}
 		c.notify_one();
 		return p.release()->get_future();

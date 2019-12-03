@@ -14,7 +14,8 @@ int foo(const A&) {
 }
 
 int main() {
-		for (int i=0;i<1;i++)
+	int N = 1;
+		for (int i=0;i<N;i++)
 		{
 			cout << "Main thread  " << this_thread::get_id() << endl;
 			ThreadPool pool(8);
@@ -52,7 +53,7 @@ int main() {
 		}
 		cout << "================================================\n\n\n";
 
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < N; i++)
 		{
 			cout << "Main thread  " << this_thread::get_id() << endl;
 			ThreadPool pool(8);
@@ -96,7 +97,7 @@ int main() {
 
 		}
 		cout << "================================================\n\n\n";
-		for (int i = 0; i < 1; i++)
+		for (int i = 0; i < N; i++)
 		{
 			cout << "Main thread  " << this_thread::get_id() << endl;
 			ThreadPool pool(8);
