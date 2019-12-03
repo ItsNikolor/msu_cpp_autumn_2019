@@ -54,8 +54,8 @@ public:
 	template <class Func, class... Args>
 	auto exec(Func func, Args... args)->std::future<decltype(func(args...))> {
 		using T = decltype(func(args...));
-		//auto f = std::bind(func, std::forward<Args>(args)...);
-		auto f = [func,args...]() {return func(args...); };
+		auto f = std::bind(func, std::forward<Args>(args)...);
+		//auto f = [func,args...]() {return func(args...); };
 		std::unique_ptr<std::promise<T>> p(new std::promise<T>);
 
 		auto pointer = p.get();
