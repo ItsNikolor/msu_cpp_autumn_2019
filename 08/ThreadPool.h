@@ -40,8 +40,7 @@ public:
 
 	~ThreadPool() {
 		std::unique_lock<std::mutex> l(m);
-
-		//_work.push_back([]() {});
+		
 		KeepWorking = false;
 
 		c.notify_all();
