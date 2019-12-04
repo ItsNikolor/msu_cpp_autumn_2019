@@ -20,8 +20,8 @@ class ThreadPool {
 		while (KeepWorking||_work.size()!=1) {
 			std::unique_lock<std::mutex> l(m);
 
-			c.wait(l, [this]() {return !(_work.empty()); });
-			if (!KeepWorking && _work.size() == 1) break;
+			c.wait(l, [this]() {return !(_work.empty()&&KeepWorking); });
+			if (!KeepWorking) break;
 
 			auto work = std::move(_work.front());
 			_work.pop_front();
@@ -41,7 +41,7 @@ public:
 	~ThreadPool() {
 		std::unique_lock<std::mutex> l(m);
 
-		_work.push_back([]() {});
+		//_work.push_back([]() {});
 		KeepWorking = false;
 
 		c.notify_all();
