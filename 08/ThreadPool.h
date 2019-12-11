@@ -14,7 +14,7 @@ class ThreadPool {
 
 	size_t _poolSize;
 	
-	volatile bool KeepWorking = true;
+	bool KeepWorking = true;
 
 	void ThreadWork() {
 		while (KeepWorking||_work.size()!=1) {
