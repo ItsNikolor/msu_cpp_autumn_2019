@@ -40,7 +40,7 @@ public:
 
 	~ThreadPool() {
 		std::unique_lock<std::mutex> l(m);
-		
+
 		KeepWorking = false;
 
 		c.notify_all();
@@ -54,18 +54,19 @@ public:
 	auto exec(Func func, Args... args)->std::future<decltype(func(args...))> {
 		using T = decltype(func(args...));
 		auto f = std::bind(func, std::forward<Args>(args)...);
-		//auto f = [func,args...]() {return func(args...); };
-		std::unique_ptr<std::promise<T>> p(new std::promise<T>);
 
-		auto pointer = p.get();
-		std::function<void()> ff = [f,pointer]() {pointer->set_value(f()); delete pointer; };
+		std::shared_ptr<std::promise<T>> p(new std::promise<T>);
+
+		std::function<void()> ff = [f, p]() {p->set_value(f()); };
+		
+		std::function<void()> fff = [ff]() {ff(); };
 
 		{
 			std::unique_lock<std::mutex> l(m);
 
-			_work.emplace_back(ff);
+			_work.emplace_back(fff);
 		}
 		c.notify_one();
-		return p.release()->get_future();
+		return p->get_future();
 	}
 };
