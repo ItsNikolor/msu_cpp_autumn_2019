@@ -21,15 +21,23 @@ int main() {
 	for (uint64_t i = TrueCount; i > 0; i--) ofile.write((char*)&i, sizeof(uint64_t));
 	ofile.close();
 	
-	sort_file("binary.dat", "out.dat");
+	try {
+		sort_file("binary.dat", "out.dat");
 
-	file.open("out.dat", ios::binary);
-	
-	for (uint64_t i = 1; i <= TrueCount; ++i) {
-		file.read((char*)&t, sizeof(uint64_t));
-		assert(t == i);
+		file.open("out.dat", ios::binary);
+
+		for (uint64_t i = 1; i <= TrueCount; ++i) {
+			file.read((char*)&t, sizeof(uint64_t));
+			assert(t == i);
+		}
+		file.close();
 	}
-	file.close();
+	catch (exception err) {
+		cout << err.what();
+	}
+	catch (...) {
+		cout << "Something wrong\n";
+	}
 
 
 	TrueCount = 1 * memory_size / sizeof(uint64_t) + 3;
@@ -41,14 +49,21 @@ int main() {
 
 	for (uint64_t i = 0; i < TrueCount; i++) ofile.write((char*)&i, sizeof(uint64_t));
 	ofile.close();
+	
+	try {
+		sort_file("binary.dat", "out.dat");
 
-	sort_file("binary.dat", "out.dat");
-
-	file.open("out.dat", ios::binary);
-	t;
-	for (uint64_t i = 0; i < TrueCount; ++i) {
-		file.read((char*)&t, sizeof(uint64_t));
-		assert(t == i);
+		file.open("out.dat", ios::binary);
+		for (uint64_t i = 0; i < TrueCount; ++i) {
+			file.read((char*)&t, sizeof(uint64_t));
+			assert(t == i);
+		}
+		file.close();
 	}
-	file.close();
+	catch (exception err) {
+		cout << err.what();
+	}
+	catch(...) {
+		cout << "Something wrong\n";
+	}
 }
