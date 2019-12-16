@@ -28,7 +28,7 @@ void sort_file(const char* in_path, const char* output_path, const char* tmp_pat
 	}
 
 	std::mutex read, write;
-	const size_t memory_size = 4194304;// 4 гб
+	const size_t memory_size = 4194304;// 4 мб
 	static auto thread_func_lambda = [memory_size](std::mutex& read, std::mutex& write,
 		std::ifstream& in_file, std::ofstream& tmp_file) {
 
