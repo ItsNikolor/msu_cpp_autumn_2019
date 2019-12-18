@@ -7,21 +7,34 @@
 #include<functional>
 #include<algorithm>
 #include<queue>
+#include<string>
+#include<exception>
+
+namespace sort_file_name {
+	class my_except : public std::exception {
+	public:
+		my_except(std::string const& message) : msg_(message) { }
+		virtual char const* what() const noexcept { return msg_.c_str(); }
+
+	private:
+		std::string msg_;
+	};
+}
 
 void sort_file(const char* in_path, const char* output_path, const char* tmp_path = "tmp.dat", size_t num_threads = 2) {
 	std::ifstream in_file(in_path, std::ios::binary);
 	if (!in_file) 
-		throw(std::exception("Can't open input file\n"));
+		throw(sort_file_name::my_except("Can't open input file\n"));
 	
 
 	std::ofstream out_file(output_path, std::ios::binary);
 	if (!out_file) 
-		throw(std::exception("Can't open output file\n"));
+		throw(sort_file_name::my_except("Can't open output file\n"));
 	
 
 	std::ofstream tmp_file(tmp_path, std::ios::binary);
 	if (!tmp_file)
-		throw(std::exception("Can't open tmp file\n"));
+		throw(sort_file_name::my_except("Can't open tmp file\n"));
 	
 
 	std::mutex read, write;
@@ -55,7 +68,7 @@ void sort_file(const char* in_path, const char* output_path, const char* tmp_pat
 
 	in_file.open(tmp_path, std::ios::binary);
 	if (!in_file) 
-		throw(std::exception("Can't open tmp file\n"));
+		throw(sort_file_name::my_except("Can't open tmp file\n"));
 	
 
 	struct Triple {

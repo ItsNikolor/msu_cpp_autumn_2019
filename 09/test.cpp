@@ -32,7 +32,7 @@ int main() {
 		}
 		file.close();
 	}
-	catch (exception err) {
+	catch (const exception &err) {
 		cout << err.what();
 	}
 	catch (...) {
@@ -60,7 +60,7 @@ int main() {
 		}
 		file.close();
 	}
-	catch (exception err) {
+	catch (const exception &err) {
 		cout << err.what();
 	}
 	catch(...) {
