@@ -31,6 +31,7 @@ int main() {
 			assert(t == i);
 		}
 		file.close();
+		cout<<"All good\n";
 	}
 	catch (const exception &err) {
 		cout << err.what();
@@ -59,6 +60,7 @@ int main() {
 			assert(t == i);
 		}
 		file.close();
+		cout<<"All good\n";
 	}
 	catch (const exception &err) {
 		cout << err.what();
@@ -67,3 +69,4 @@ int main() {
 		cout << "Something wrong\n";
 	}
 }
+
